@@ -19,12 +19,22 @@ public class NginxConfigureTask extends AsyncTask<String, Integer, Boolean> {
 	/**
 	 * Nginx config file name.
 	 */
-	public static final String NGINX_CONF_FILENAME = "nginx.conf";
+	public static final String NGINX_CONF_FILENAME = "conf/nginx.conf";
 
 	/**
 	 * Nginx mime-type list file name.
 	 */
-	public static final String NGINX_MIMETYPES_FILENAME = "mime.types";
+	public static final String NGINX_MIMETYPES_FILENAME = "conf/mime.types";
+
+	/**
+	 * Nginx index.html file name.
+	 */
+	public static final String NGINX_HTTP_INDEX_FILENAME = "html/index.html";
+
+	/**
+	 * Nginx index.html file name.
+	 */
+	public static final String NGINX_HTTP_50x_FILENAME = "html/50x.html";
 
 	/**
 	 * Default task number.
@@ -77,6 +87,11 @@ public class NginxConfigureTask extends AsyncTask<String, Integer, Boolean> {
 	private File logsDirectory;
 
 	/**
+	 * Nginx html directory.
+	 */
+	private File htmlDirectory;
+
+	/**
 	 * Exception.
 	 */
 	private Exception exception;
@@ -100,6 +115,7 @@ public class NginxConfigureTask extends AsyncTask<String, Integer, Boolean> {
 		nginxDirectory = rootDirectory;
 		logsDirectory = new File(nginxDirectory, "logs");
 		confDirectory = new File(nginxDirectory, "conf");
+		htmlDirectory = new File(nginxDirectory, "html");
 	}
 
 	/**
@@ -139,6 +155,12 @@ public class NginxConfigureTask extends AsyncTask<String, Integer, Boolean> {
 		}
 		countUpTaskProgress();
 
+		if (!makeDirectory(htmlDirectory)) {
+			publishProgress(PERCENTAG_MAGIC_NUMBER);
+			return false;
+		}
+		countUpTaskProgress();
+
 		if (params == null) {
 			publishProgress(PERCENTAG_MAGIC_NUMBER);
 
@@ -149,7 +171,7 @@ public class NginxConfigureTask extends AsyncTask<String, Integer, Boolean> {
 			InputStream is = null;
 			try {
 				is = cxt.getAssets().open(file);
-				copyNginxConf(is, new File(confDirectory, file));
+				copyNginxConf(is, new File(nginxDirectory, file));
 			} catch (IOException e) {
 				logger.severe(e.toString());
 				exception = e;
